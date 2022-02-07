@@ -1,7 +1,7 @@
 from typing_extensions import final
 from absl import logging
 import timeit
-from wordle import Wordle, GuessResult, GameResult
+from src.wordle import Wordle, GuessResult, GameResult
 
 class BaseStrategy:
     def __init__(self, game: Wordle) -> None:

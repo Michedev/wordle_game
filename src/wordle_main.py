@@ -13,6 +13,7 @@ from strategies.base import BaseStrategy
 from strategies.human import HumanStrategy
 from strategies.random import RandomStrategy
 from strategies.similar_words import SimilarWordsStrategy
+from strategies.mikedev import MikedevStrategy
 
 
 flags.DEFINE_string('words_file', './bag_of_words.txt',
@@ -25,7 +26,7 @@ flags.DEFINE_integer(
 # (2) Add a flag value for your strat        #
 ##############################################
 flags.DEFINE_enum('strategy', 'similar_words', [
-                  'human', 'random', 'similar_words'], 'What type of strategy you want the AI to use.')
+                  'human', 'random', 'similar_words', 'mikedev'], 'What type of strategy you want the AI to use.')
 
 flags.DEFINE_string('secret_word', None,
                     'Set this flag to the word that you want to be the secret one.')
@@ -46,6 +47,8 @@ def pick_ai(game: Wordle, strategy: str) -> BaseStrategy:
     ##############################################
     # (3) Construct your strategy here           #
     ##############################################
+    elif strategy == 'mikedev':
+        return MikedevStrategy(game)
     else:
         return BaseStrategy(game)
 
