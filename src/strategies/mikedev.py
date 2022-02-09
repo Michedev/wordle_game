@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 
 from src.strategies.base import BaseStrategy
+import pyximport
+pyximport.install()
+from src.util.entropy import compute_constraints_entropy
 from src.wordle import GuessResult, Result, Wordle
 from path import Path
 
@@ -39,14 +42,22 @@ class MikedevStrategy(BaseStrategy):
         self.root_path = Path(__file__).parent.parent.parent
         with open(self.root_path / 'bag_of_words.txt') as f:
             self.words = f.read().split('\n')
+        import sqlite3
+        con = sqlite3.connect(self.root_path / 'word_entropy.db')
+        self.words_entropy = pd.read_sql_query("select word, entropy from word_info", con).set_index('word')
+        self.words_entropy = self.words_entropy.to_dict()['entropy']
         self.words_prob = pd.read_csv(self.root_path / 'unigram_freq_wordle.csv', usecols=['word', 'probability']).set_index('word')
         self.words_prob = self.words_prob.to_dict()['probability']
         print('================ init new game =========================')
+        self.first = True
         print(game._secret_word)
 
     def get_guess(self) -> str:
         """Returns the next guess to try."""
-        guessed_word = max(self.words, key=self.words_prob.__getitem__)
+        if not self.first:
+            self._update_entropy_()
+            self.first = False
+        guessed_word = max(self.words, key=lambda w: self.words_entropy[w])
         print(f"{guessed_word = }")
         return guessed_word
 
@@ -64,6 +75,7 @@ class MikedevStrategy(BaseStrategy):
         for c in new_constraints:
             self.words = filter(c.match, self.words)
         self.words = list(self.words)
+
         print(f"{len(self.words) = }")
         print(f'{self.words[:5] = }')
         return guess_result
@@ -81,3 +93,7 @@ class MikedevStrategy(BaseStrategy):
                     copy_constraints.append(new_constraint)
                     return copy_constraints
         return False
+
+    def _update_entropy_(self):
+        for word in self.words:
+            self.words_entropy[word] = compute_constraints_entropy(word, self.words)
