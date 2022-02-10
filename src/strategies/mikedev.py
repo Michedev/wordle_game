@@ -1,3 +1,5 @@
+from random import sample
+
 import numpy as np
 import pandas as pd
 
@@ -56,7 +58,7 @@ class MikedevStrategy(BaseStrategy):
         """Returns the next guess to try."""
         if not self.first:
             self._update_entropy_()
-            self.first = False
+        self.first = False
         guessed_word = max(self.words, key=lambda w: self.words_entropy[w])
         print(f"{guessed_word = }")
         return guessed_word
@@ -96,4 +98,4 @@ class MikedevStrategy(BaseStrategy):
 
     def _update_entropy_(self):
         for word in self.words:
-            self.words_entropy[word] = compute_constraints_entropy(word, self.words)
+            self.words_entropy[word] = compute_constraints_entropy(word, self.words if len(self.words) < 400 else sample(self.words, 400))
