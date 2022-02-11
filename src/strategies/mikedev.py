@@ -61,6 +61,8 @@ class MikedevStrategy(BaseStrategy):
         if self.round > 0:
             self._update_entropy_()
         self.round += 1
+        if len(self.words) == 1:
+            return self.words[0]
         guessed_word = max(self.words, key=lambda w: self.words_entropy[w])
         print(f"{guessed_word = }")
         return guessed_word
@@ -98,6 +100,8 @@ class MikedevStrategy(BaseStrategy):
         return False
 
     def _update_entropy_(self):
-        self.words_entropy = compute_words_entropy_by_letters(self.words, self.words)
+        self.words_entropy = compute_words_entropy_by_letters(self.words, self.all_words)
+        for w in self.words:
+            self.words_entropy[w] += 1
         # for word in self.words:
         #     self.words_entropy[word] = compute_constraints_entropy(word, self.words if len(self.words) < 400 else sample(self.words, 400), self.words_prob)
