@@ -48,7 +48,7 @@ cdef:
                     l_distribution = [p_green[l][i], p_yellow[l][i], p_gray[l][i]]
                     l_distribution = np.array(l_distribution)
                     l_distribution = l_distribution / l_distribution.sum()
-                    l_entropy = - (l_distribution * np.log2(l_distribution)).sum()
+                    l_entropy = - (l_distribution * np.log2(l_distribution + 1e-5)).sum()
                     self.entropy_letters[l][i] = l_entropy
 
 
